@@ -62,6 +62,7 @@ video,img.pv{width:100%;border-radius:10px;margin-top:10px;background:#000;max-h
 <input id="fs" type="range" min="720" max="3000" step="60" value="1920">
 <div class="stat"><span>Asli <b id="fo">-</b></span><span>Hasil <b id="fn">-</b></span></div>
 <button class="go" id="fsave">Simpan foto</button>
+<button class="go" id="fshare">Bagikan ke Status WA</button>
 <p class="note" id="fsn"></p>
 <p class="note">Kualitas 80–90 biasanya sudah sulit dibedakan dari aslinya, tapi ukurannya bisa turun jauh.</p>
 </div>
@@ -85,6 +86,7 @@ video,img.pv{width:100%;border-radius:10px;margin-top:10px;background:#000;max-h
 <p class="note" id="vst">Proses berjalan sepanjang durasi video. Biarkan layar tetap menyala dan jangan pindah aplikasi.</p>
 <video id="vout" class="hide" controls playsinline></video>
 <button class="go hide" id="vsave">Simpan video</button>
+<button class="go hide" id="vshare">Bagikan ke Status WA</button>
 </div>
 </div>
 </section>
@@ -128,6 +130,18 @@ $("fi").onchange=function(e){
   im.onload=function(){img=im;$("fw").classList.remove("hide");fRender()};
   im.src=URL.createObjectURL(f);
 };
+function shareToWhatsApp(blob,name,st){
+  if(!blob){st.textContent="Buat hasil terlebih dahulu.";return}
+  var f;
+  try{f=new File([blob],name,{type:blob.type||"application/octet-stream"})}catch(e){st.textContent="Browser ini tidak mendukung berbagi file. Simpan hasil lalu bagikan dari galeri.";return}
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){
+    navigator.share({files:[f],title:"Bagikan ke Status WhatsApp",text:"Pilih WhatsApp, lalu pilih Status Saya."})
+      .then(function(){st.textContent="Menu berbagi dibuka. Pilih WhatsApp lalu Status Saya."})
+      .catch(function(e){if(!e||e.name!=="AbortError")st.textContent="Berbagi dibatalkan atau tidak didukung. Gunakan tombol Simpan, lalu bagikan dari galeri."});
+  }else{
+    st.textContent="Berbagi langsung tidak didukung browser ini. Simpan hasil, buka galeri, lalu pilih Bagikan > WhatsApp > Status Saya.";
+  }
+}
 function dl(blob,name,st){
   function plain(){
     var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;
@@ -144,6 +158,7 @@ function dl(blob,name,st){
   plain();
 }
 $("fsave").onclick=function(){if(fBlob)dl(fBlob,"foto-jernih.jpg",$("fsn"))};
+$("fshare").onclick=function(){shareToWhatsApp(fBlob,"foto-jernih.jpg",$("fsn"))};
 
 // ===== VIDEO =====
 var v=$("vsrc"),vOrig=0,vBlob=null,recording=false,vFile=null,lastWhy="",fastFailed=false,FPS=60;
@@ -333,6 +348,10 @@ $("vgo").onclick=function(){
 $("vsave").onclick=function(){
   if(!vBlob)return;
   dl(vBlob,"video-jernih."+(vBlob.type.indexOf("mp4")>-1?"mp4":"webm"),$("vst"));
+};
+$("vshare").onclick=function(){
+  if(!vBlob)return;
+  shareToWhatsApp(vBlob,"video-jernih."+(vBlob.type.indexOf("mp4")>-1?"mp4":"webm"),$("vst"));
 };
 })();
 </script>
