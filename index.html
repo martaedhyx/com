@@ -42,7 +42,7 @@ video,img.pv{width:100%;border-radius:10px;margin-top:10px;background:#000;max-h
 <body>
 <main>
 <h1>Status Jernih</h1>
-<p class="sub">Kecilkan ukuran foto dan video untuk status WhatsApp dengan kualitas tetap terlihat tajam.</p>
+<p class="sub">Kecilkan foto/video atau bagikan video asli tanpa diproses oleh website.</p>
 
 <div class="tabs">
 <button class="chip" id="tf" aria-pressed="true">Foto</button>
@@ -87,6 +87,8 @@ video,img.pv{width:100%;border-radius:10px;margin-top:10px;background:#000;max-h
 <video id="vout" class="hide" controls playsinline></video>
 <button class="go hide" id="vsave">Simpan video</button>
 <button class="go hide" id="vshare">Bagikan ke Status WA</button>
+<button class="go hide" id="vorigshare">Bagikan Video Asli (Tanpa Kompres)</button>
+<button class="go hide" id="vorigsave">Simpan Video Asli</button>
 </div>
 </div>
 </section>
@@ -170,8 +172,9 @@ $("vb").oninput=function(){$("vbv").textContent=(+this.value).toFixed(1)+" Mbps"
 $("vs").oninput=function(){$("vsv").textContent=this.value};
 $("vi").onchange=function(e){
   var f=e.target.files[0];if(!f)return;
-  vFile=f;vOrig=f.size;$("vo").textContent=mb(f.size);
-  v.src=URL.createObjectURL(f);
+  vFile=f;vOrig=f.size;vBlob=null;$("vo").textContent=mb(f.size);
+  $("vorigshare").classList.remove("hide");$("vorigsave").classList.remove("hide");
+  $("vsrc").src=URL.createObjectURL(f);v.src=URL.createObjectURL(f);
   v.onloadedmetadata=function(){$("vw").classList.remove("hide");vEst()};
 };
 function pickMime(){
@@ -352,6 +355,12 @@ $("vsave").onclick=function(){
 $("vshare").onclick=function(){
   if(!vBlob)return;
   shareToWhatsApp(vBlob,"video-jernih."+(vBlob.type.indexOf("mp4")>-1?"mp4":"webm"),$("vst"));
+};
+$("vorigshare").onclick=function(){if(!vFile)return;shareToWhatsApp(vFile,vFile.name||"video-asli", $("vst"))};
+$("vorigsave").onclick=function(){
+  if(!vFile)return;
+  var a=document.createElement("a");a.href=URL.createObjectURL(vFile);a.download=vFile.name||"video-asli";
+  document.body.appendChild(a);a.click();a.remove();$("vst").textContent="Menyimpan salinan video asli tanpa diproses…";
 };
 })();
 </script>
